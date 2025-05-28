@@ -25,6 +25,7 @@ import { EducationForm } from "@/components/education-form"
 import { LanguageCard } from "@/components/language-card"
 import { LanguageForm } from "@/components/language-form"
 import { useToast } from "@/hooks/use-toast"
+import { ColorSelector } from "@/components/color-selector"
 
 // Form schema with more flexible validation
 const formSchema = z.object({
@@ -71,23 +72,6 @@ const formSchema = z.object({
 })
 
 type FormValues = z.infer<typeof formSchema>
-
-interface ColorSwatchProps {
-  color: string
-  isSelected: boolean
-  onClick: () => void
-}
-
-const ColorSwatch: React.FC<ColorSwatchProps> = ({ color, isSelected, onClick }) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-8 h-8 rounded-full cursor-pointer transition-all duration-200 ${isSelected ? "ring-2 ring-primary ring-offset-1" : "hover:scale-110"}`}
-      style={{ backgroundColor: color }}
-      aria-label={`Select color ${color}`}
-    />
-  )
-}
 
 export default function ResumeBuilder() {
   const { theme } = useTheme()
@@ -1199,43 +1183,14 @@ export default function ResumeBuilder() {
                 <CardContent className="pt-6">
                   {/* Theme Color Selection */}
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-4">Select Theme Color</h3>
-                    <div className="flex items-center mb-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={fetchAvailableColors}
-                        disabled={isLoadingColors}
-                        className="mr-2"
-                      >
-                        {isLoadingColors ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4" />
-                        )}
-                        <span className="ml-1">Refresh Colors</span>
-                      </Button>
-                      {colorError && <p className="text-sm text-red-500 dark:text-red-400">{colorError}</p>}
-                    </div>
-
-                    {isLoadingColors ? (
-                      <div className="flex items-center justify-center py-4">
-                        <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
-                        <span className="ml-2 text-gray-500 dark:text-gray-400">Loading colors...</span>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-3">
-                        {availableColors.map((color) => (
-                          <ColorSwatch
-                            key={color}
-                            color={color}
-                            isSelected={selectedColor === color}
-                            onClick={() => setSelectedColor(color)}
-                          />
-                        ))}
-                      </div>
-                    )}
+                    <ColorSelector
+                      availableColors={availableColors}
+                      selectedColor={selectedColor}
+                      onColorSelect={setSelectedColor}
+                      onRefreshColors={fetchAvailableColors}
+                      isLoading={isLoadingColors}
+                      error={colorError}
+                    />
                   </div>
 
                   {resumeImage ? (
