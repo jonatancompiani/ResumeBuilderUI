@@ -6,7 +6,6 @@ import { LandingHero } from "@/components/landing-hero"
 import { FeatureSection } from "@/components/feature-section"
 import { HowItWorks } from "@/components/how-it-works"
 import { FinalCta } from "@/components/final-cta"
-import { FixedDonationPanel } from "@/components/fixed-donation-panel"
 
 export default function Home() {
   // Schema.org JSON-LD data for the resume builder
@@ -81,7 +80,7 @@ export default function Home() {
   }
 
   return (
-    <LayoutWrapper showBreadcrumbs={false} showDonationBanner={false} isLandingPage={true}>
+    <LayoutWrapper showBreadcrumbs={false} isLandingPage={true}>
       <JsonLd data={schemaData} />
       <JsonLd data={faqSchemaData} />
 
@@ -102,9 +101,6 @@ export default function Home() {
 
       {/* Final CTA */}
       <FinalCta />
-
-      {/* Fixed Donation Panel */}
-      <FixedDonationPanel />
     </LayoutWrapper>
   )
 }

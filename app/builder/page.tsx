@@ -1,5 +1,4 @@
 import ResumeBuilder from "@/components/resume-builder"
-import { DonationBanner } from "@/components/donation-banner"
 import { LayoutWrapper } from "@/components/layout-wrapper"
 import type { Metadata } from "next"
 
@@ -10,10 +9,7 @@ export const metadata: Metadata = {
 
 export default function BuilderPage() {
   return (
-    <LayoutWrapper showDonationBanner={true}>
-      {/* Single donation banner */}
-      <DonationBanner position="header" className="mb-6 sm:mb-8" />
-
+    <LayoutWrapper>
       <ResumeBuilder />
     </LayoutWrapper>
   )
