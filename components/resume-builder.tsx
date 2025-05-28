@@ -14,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { LinkedInImportButton } from "@/components/linkedin-import-button"
 import { ExperienceCard } from "@/components/experience-card"
@@ -22,6 +21,8 @@ import { EducationCard } from "@/components/education-card"
 import { ExperienceForm } from "@/components/experience-form"
 import { EducationForm } from "@/components/education-form"
 import { AnimatePresence } from "framer-motion"
+import { LanguageCard } from "@/components/language-card"
+import { LanguageForm } from "@/components/language-form"
 
 // Form schema with more flexible validation
 const formSchema = z.object({
@@ -111,6 +112,8 @@ export default function ResumeBuilder() {
   const [showEducationForm, setShowEducationForm] = useState(false)
   const [editingExperienceIndex, setEditingExperienceIndex] = useState<number | null>(null)
   const [editingEducationIndex, setEditingEducationIndex] = useState<number | null>(null)
+  const [showLanguageForm, setShowLanguageForm] = useState(false)
+  const [editingLanguageIndex, setEditingLanguageIndex] = useState<number | null>(null)
 
   // Initialize form with default values
   const form = useForm<FormValues>({
@@ -1063,73 +1066,81 @@ export default function ResumeBuilder() {
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-center mb-6">
                     <h3 className="text-lg font-medium">Languages</h3>
-                    <Button type="button" onClick={addLanguage} className="bg-green-600 hover:bg-green-700">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        setShowLanguageForm(true)
+                        setEditingLanguageIndex(null)
+                        addLanguage()
+                      }}
+                      className={`transition-colors ${
+                        theme === "dark"
+                          ? "bg-green-600 hover:bg-green-700 text-white border-green-600 hover:border-green-700"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }`}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Language
                     </Button>
                   </div>
 
-                  {form.watch("languages").map((_, index) => (
-                    <div
-                      key={index}
-                      className="mb-6 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0 last:mb-0 last:pb-0"
-                    >
-                      <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-md font-medium">Language #{index + 1}</h4>
-                        <Button type="button" variant="destructive" size="sm" onClick={() => removeLanguage(index)}>
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
-                        </Button>
-                      </div>
+                  {/* Display existing languages as cards */}
+                  <div className="space-y-4 mb-6">
+                    <AnimatePresence>
+                      {form.watch("languages").map((language, index) => {
+                        // Don't show card for the item being edited or if it's empty
+                        if (editingLanguageIndex === index || (!language.language && !language.proficiency)) {
+                          return null
+                        }
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name={`languages.${index}.language`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Language</FormLabel>
-                              <FormControl>
-                                <Input placeholder="English, Spanish, etc." {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                        return (
+                          <LanguageCard
+                            key={index}
+                            language={language}
+                            index={index}
+                            onEdit={(idx) => {
+                              setEditingLanguageIndex(idx)
+                              setShowLanguageForm(true)
+                            }}
+                            onDelete={removeLanguage}
+                          />
+                        )
+                      })}
+                    </AnimatePresence>
+                  </div>
 
-                        <FormField
-                          control={form.control}
-                          name={`languages.${index}.proficiency`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Proficiency</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select proficiency level" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Beginner">Beginner</SelectItem>
-                                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                                  <SelectItem value="Advanced">Advanced</SelectItem>
-                                  <SelectItem value="Fluent">Fluent</SelectItem>
-                                  <SelectItem value="Native">Native</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-                  ))}
-
-                  {form.watch("languages").length === 0 && (
+                  {/* Show message if no languages */}
+                  {form.watch("languages").length === 0 && !showLanguageForm && (
                     <div className="text-center py-8 text-muted-foreground">
                       <p>No languages added yet. Click "Add Language" to get started.</p>
                     </div>
                   )}
+
+                  {/* Language form */}
+                  <LanguageForm
+                    form={form}
+                    index={editingLanguageIndex ?? form.watch("languages").length - 1}
+                    isEditing={editingLanguageIndex !== null}
+                    showForm={showLanguageForm}
+                    onSave={() => {
+                      setShowLanguageForm(false)
+                      setEditingLanguageIndex(null)
+                    }}
+                    onCancel={() => {
+                      setShowLanguageForm(false)
+                      if (editingLanguageIndex === null) {
+                        // Remove the empty entry that was added
+                        const currentLanguages = form.getValues("languages")
+                        if (currentLanguages.length > 0) {
+                          const lastLanguage = currentLanguages[currentLanguages.length - 1]
+                          if (!lastLanguage.language && !lastLanguage.proficiency) {
+                            removeLanguage(currentLanguages.length - 1)
+                          }
+                        }
+                      }
+                      setEditingLanguageIndex(null)
+                    }}
+                  />
 
                   <div className="flex justify-between mt-6">
                     <Button type="button" variant="outline" onClick={() => setActiveTab("skills")}>

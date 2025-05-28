@@ -18,7 +18,6 @@ export function FinalCta() {
   const buttonVariants = {
     hover: {
       scale: 1.05,
-      boxShadow: "0 20px 40px rgba(124, 58, 237, 0.3)",
       transition: {
         duration: 0.3,
         ease: "easeOut",
@@ -141,15 +140,19 @@ export function FinalCta() {
               <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants}>
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-lg px-8 py-4 shadow-xl relative overflow-hidden"
+                  className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-lg px-8 py-4 shadow-xl relative overflow-hidden border-0 rounded-lg"
                 >
                   {/* Button shine effect */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
                     initial={{ x: "-100%" }}
                     whileHover={{
                       x: "100%",
                       transition: { duration: 0.6, ease: "easeInOut" },
+                    }}
+                    style={{
+                      clipPath: "inset(0)",
+                      borderRadius: "inherit",
                     }}
                   />
                   Create Your Resume Now <ArrowRight className="ml-2 h-5 w-5" />

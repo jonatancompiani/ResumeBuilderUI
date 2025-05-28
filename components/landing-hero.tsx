@@ -144,7 +144,7 @@ export function LandingHero() {
               <motion.div whileHover="hover" whileTap="tap" variants={buttonVariants} className="inline-block">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-lg px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-700 hover:to-cyan-600 text-lg px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-0 rounded-lg"
                 >
                   Create Your Resume <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -234,7 +234,7 @@ export function LandingHero() {
                 <Button
                   size="lg"
                   variant="secondary"
-                  className="font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="font-medium shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border-0 rounded-lg"
                 >
                   Start Building Now <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
