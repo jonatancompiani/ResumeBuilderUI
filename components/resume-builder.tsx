@@ -5,8 +5,9 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Loader2, Plus, Trash2, Download, AlertCircle, RefreshCw } from "lucide-react"
+import { Loader2, Plus, Trash2, Download, AlertCircle, RefreshCw } from 'lucide-react'
 import { useTheme } from "next-themes"
+import { motion, AnimatePresence } from "framer-motion"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,23 +15,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { LinkedInImportButton } from "@/components/linkedin-import-button"
 import { ExperienceCard } from "@/components/experience-card"
 import { EducationCard } from "@/components/education-card"
 import { ExperienceForm } from "@/components/experience-form"
 import { EducationForm } from "@/components/education-form"
-import { AnimatePresence } from "framer-motion"
 import { LanguageCard } from "@/components/language-card"
 import { LanguageForm } from "@/components/language-form"
+import { useToast } from "@/hooks/use-toast"
 
 // Form schema with more flexible validation
 const formSchema = z.object({
   personalInfo: z.object({
-    fullName: z.string().min(2, { message: "Name must be at least 2 characters." }),
-    email: z.string().email({ message: "Please enter a valid email address." }),
-    phone: z.string().min(5, { message: "Please enter a valid phone number." }),
-    location: z.string().min(2, { message: "Please enter your location." }),
+    fullName: z.string().min(1, { message: "Name is required." }),
+    email: z.string().min(1, { message: "Email is required." }).email({ message: "Please enter a valid email address." }),
+    phone: z.string().min(1, { message: "Phone number is required." }),
+    location: z.string().min(1, { message: "Location is required." }),
     linkedin: z.string().optional(),
     github: z.string().optional(),
     summary: z.string().optional(),
@@ -89,6 +91,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ color, isSelected, onClick })
 
 export default function ResumeBuilder() {
   const { theme } = useTheme()
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("personal")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false)
@@ -428,7 +431,11 @@ export default function ResumeBuilder() {
   // Handle form submission
   const onSubmit = async (data: FormValues) => {
     if (!selectedColor) {
-      alert("Please select a theme color before generating your resume")
+      toast({
+        title: "Color Selection Required",
+        description: "Please select a theme color before generating your resume.",
+        variant: "destructive",
+      })
       return
     }
 
@@ -437,25 +444,41 @@ export default function ResumeBuilder() {
 
     // Check if we have at least one valid entry for required arrays
     if (cleanedData.workExperiences.length === 0) {
-      alert("Please add at least one complete work experience entry.")
+      toast({
+        title: "Work Experience Required",
+        description: "Please add at least one complete work experience entry.",
+        variant: "destructive",
+      })
       setActiveTab("experience")
       return
     }
 
     if (cleanedData.education.length === 0) {
-      alert("Please add at least one complete education entry.")
+      toast({
+        title: "Education Required", 
+        description: "Please add at least one complete education entry.",
+        variant: "destructive",
+      })
       setActiveTab("education")
       return
     }
 
     if (cleanedData.skills.length === 0) {
-      alert("Please add at least one skill.")
+      toast({
+        title: "Skills Required",
+        description: "Please add at least one skill.",
+        variant: "destructive",
+      })
       setActiveTab("skills")
       return
     }
 
     if (cleanedData.languages.length === 0) {
-      alert("Please add at least one language.")
+      toast({
+        title: "Languages Required",
+        description: "Please add at least one language.",
+        variant: "destructive",
+      })
       setActiveTab("languages")
       return
     }
@@ -487,12 +510,20 @@ export default function ResumeBuilder() {
         const imageUrl = `data:image/png;base64,${responseData.imageData}`
         setResumeImage(imageUrl)
         setActiveTab("preview")
+        toast({
+          title: "Resume Generated",
+          description: "Your resume has been generated successfully!",
+        })
       } else {
         throw new Error("Failed to get resume image data")
       }
     } catch (error) {
       console.error("Error submitting resume:", error)
-      alert(`Failed to generate resume: ${error.message || "Unknown error"}`)
+      toast({
+        title: "Generation Failed",
+        description: `Failed to generate resume: ${error.message || "Unknown error"}`,
+        variant: "destructive",
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -654,6 +685,14 @@ export default function ResumeBuilder() {
           <form
             onSubmit={form.handleSubmit(onSubmit, (errors) => {
               console.error("Form validation errors:", errors)
+              
+              // Show a user-friendly error message
+              toast({
+                title: "Form Incomplete",
+                description: "Please fill in all required fields before generating your resume.",
+                variant: "destructive",
+              })
+              
               navigateToFirstErrorTab()
             })}
           >

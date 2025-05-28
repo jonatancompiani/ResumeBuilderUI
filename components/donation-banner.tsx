@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { X, Heart, Gift, Star, ArrowRight } from "lucide-react"
+import { X, Heart, Gift, Star, ArrowRight } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useTheme } from "next-themes"
@@ -11,120 +11,120 @@ import { motion } from "framer-motion"
 import { useMobile } from "@/hooks/use-mobile"
 
 interface DonationBannerProps {
-  position: "header" | "footer" | "preview"
-  className?: string
+ position: "header" | "footer" | "preview"
+ className?: string
 }
 
 export function DonationBanner({ position, className = "" }: DonationBannerProps) {
-  const [isVisible, setIsVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-  const { theme } = useTheme()
-  const isMobile = useMobile()
-  const donationUrl = "https://www.paypal.com/donate/?business=A6BZAPTWMMSEC&no_recurring=0&currency_code=BRL"
+ const [isVisible, setIsVisible] = useState(false)
+ const [isHovered, setIsHovered] = useState(false)
+ const { theme } = useTheme()
+ const isMobile = useMobile()
+ const donationUrl = "https://www.paypal.com/donate/?business=A6BZAPTWMMSEC&no_recurring=0&currency_code=BRL"
 
-  // Banner text based on position
-  const getBannerText = () => {
-    switch (position) {
-      case "header":
-        return isMobile ? "Support this tool!" : "Support this free resume builder tool!"
-      case "footer":
-        return isMobile ? "Found it helpful?" : "Did you find this tool helpful? Consider supporting us!"
-      case "preview":
-        return isMobile ? "Love your resume?" : "Love your new resume? Help us keep this tool free!"
-      default:
-        return "Support this project!"
-    }
-  }
+ // Banner text based on position
+ const getBannerText = () => {
+   switch (position) {
+     case "header":
+       return isMobile ? "Support this tool!" : "Support this free resume builder tool!"
+     case "footer":
+       return isMobile ? "Found it helpful?" : ""
+     case "preview":
+       return isMobile ? "Love your resume?" : "Love your new resume? Help us keep this tool free!"
+     default:
+       return "Support this project!"
+   }
+ }
 
-  // Get icon based on position
-  const getBannerIcon = () => {
-    switch (position) {
-      case "header":
-        return <Star className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
-      case "footer":
-        return <Gift className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
-      case "preview":
-        return <Star className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
-      default:
-        return <Heart className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
-    }
-  }
+ // Get icon based on position
+ const getBannerIcon = () => {
+   switch (position) {
+     case "header":
+       return <Star className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
+     case "footer":
+       return <Gift className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
+     case "preview":
+       return <Star className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
+     default:
+       return <Heart className={`${isMobile ? "h-4 w-4" : "h-5 w-5"}`} aria-hidden="true" />
+   }
+ }
 
-  useEffect(() => {
-    // Check if the banner has been dismissed before
-    const isDismissed = localStorage.getItem(`donation-banner-${position}-dismissed`)
+ useEffect(() => {
+   // Check if the banner has been dismissed before
+   const isDismissed = localStorage.getItem(`donation-banner-${position}-dismissed`)
 
-    if (!isDismissed) {
-      setIsVisible(true)
-      // Track impression
-      trackImpression(position)
-    }
-  }, [position])
+   if (!isDismissed) {
+     setIsVisible(true)
+     // Track impression
+     trackImpression(position)
+   }
+ }, [position])
 
-  const dismissBanner = (e: React.MouseEvent) => {
-    // Prevent the event from bubbling up to the form
-    e.preventDefault()
-    e.stopPropagation()
+ const dismissBanner = (e: React.MouseEvent) => {
+   // Prevent the event from bubbling up to the form
+   e.preventDefault()
+   e.stopPropagation()
 
-    setIsVisible(false)
-    // Save dismissal preference to localStorage
-    localStorage.setItem(`donation-banner-${position}-dismissed`, "true")
-  }
+   setIsVisible(false)
+   // Save dismissal preference to localStorage
+   localStorage.setItem(`donation-banner-${position}-dismissed`, "true")
+ }
 
-  const handleDonateClick = (e: React.MouseEvent) => {
-    // Prevent the event from bubbling up to the form
-    e.preventDefault()
-    e.stopPropagation()
+ const handleDonateClick = (e: React.MouseEvent) => {
+   // Prevent the event from bubbling up to the form
+   e.preventDefault()
+   e.stopPropagation()
 
-    // Track click
-    trackClick(position)
-    // Open donation URL in new tab
-    window.open(donationUrl, "_blank")
-  }
+   // Track click
+   trackClick(position)
+   // Open donation URL in new tab
+   window.open(donationUrl, "_blank")
+ }
 
-  // Track banner impression
-  const trackImpression = (bannerPosition: string) => {
-    // In a real app, you might send this to an analytics service
-    console.log(`Banner impression: ${bannerPosition}`)
+ // Track banner impression
+ const trackImpression = (bannerPosition: string) => {
+   // In a real app, you might send this to an analytics service
+   console.log(`Banner impression: ${bannerPosition}`)
 
-    // Update impression count in localStorage
-    const impressions = JSON.parse(localStorage.getItem("donation-banner-impressions") || "{}")
-    impressions[bannerPosition] = (impressions[bannerPosition] || 0) + 1
-    localStorage.setItem("donation-banner-impressions", JSON.stringify(impressions))
-  }
+   // Update impression count in localStorage
+   const impressions = JSON.parse(localStorage.getItem("donation-banner-impressions") || "{}")
+   impressions[bannerPosition] = (impressions[bannerPosition] || 0) + 1
+   localStorage.setItem("donation-banner-impressions", JSON.stringify(impressions))
+ }
 
-  // Track donation click
-  const trackClick = (bannerPosition: string) => {
-    // In a real app, you might send this to an analytics service
-    console.log(`Banner click: ${bannerPosition}`)
+ // Track donation click
+ const trackClick = (bannerPosition: string) => {
+   // In a real app, you might send this to an analytics service
+   console.log(`Banner click: ${bannerPosition}`)
 
-    // Update click count in localStorage
-    const clicks = JSON.parse(localStorage.getItem("donation-banner-clicks") || "{}")
-    clicks[bannerPosition] = (clicks[bannerPosition] || 0) + 1
-    localStorage.setItem("donation-banner-clicks", JSON.stringify(clicks))
-  }
+   // Update click count in localStorage
+   const clicks = JSON.parse(localStorage.getItem("donation-banner-clicks") || "{}")
+   clicks[bannerPosition] = (clicks[bannerPosition] || 0) + 1
+   localStorage.setItem("donation-banner-clicks", JSON.stringify(clicks))
+ }
 
-  if (!isVisible) return null
+ if (!isVisible) return null
 
-  // Different styles based on position
-  const getPositionStyles = () => {
-    switch (position) {
-      case "header":
-        return "rounded-lg mb-6"
-      case "footer":
-        return "rounded-lg mt-8"
-      case "preview":
-        return "rounded-lg my-6"
-      default:
-        return "rounded-lg my-4"
-    }
-  }
+ // Different styles based on position
+ const getPositionStyles = () => {
+   switch (position) {
+     case "header":
+       return "rounded-lg mb-6"
+     case "footer":
+       return "rounded-lg mt-8"
+     case "preview":
+       return "rounded-lg my-6"
+     default:
+       return "rounded-lg my-4"
+   }
+ }
 
-  // Get background pattern based on theme
-  const getBackgroundPattern = () => {
-    return theme === "dark"
-      ? "radial-gradient(circle at 25% 110%, rgba(124, 58, 237, 0.15) 0%, transparent 70%), radial-gradient(circle at 75% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 70%)"
-      : "radial-gradient(circle at 25% 110%, rgba(124, 58, 237, 0.08) 0%, transparent 70%), radial-gradient(circle at 75% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 70%)"
+ // Get background pattern based on theme
+ const getBackgroundPattern = () => {
+   return theme === "dark"
+     ? "radial-gradient(circle at 25% 110%, rgba(124, 58, 237, 0.15) 0%, transparent 70%), radial-gradient(circle at 75% 10%, rgba(56, 189, 248, 0.15) 0%, transparent 70%)"
+     : "radial-gradient(circle at 25% 110%, rgba(124, 58, 237, 0.08) 0%, transparent 70%), radial-gradient(circle at 75% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 70%)"
   }
 
   return (
@@ -162,9 +162,11 @@ export function DonationBanner({ position, className = "" }: DonationBannerProps
               </motion.div>
               <h2 className="font-semibold text-base sm:text-lg">{getBannerText()}</h2>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
-              Your support helps us maintain and improve this free tool for everyone
-            </p>
+            {position === "header" && (
+              <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                Your support helps us maintain and improve this free tool for everyone
+              </p>
+            )}
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
