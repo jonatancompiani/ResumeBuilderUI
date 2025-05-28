@@ -2,27 +2,24 @@
 
 import { useState, useEffect } from "react"
 
-export function useMobile(): boolean {
+export function useMobile() {
   const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Check if window is defined (client-side)
-    if (typeof window !== "undefined") {
-      const checkMobile = () => {
-        setIsMobile(window.innerWidth < 768)
-      }
-
-      // Initial check
-      checkMobile()
-
-      // Add event listener for window resize
-      window.addEventListener("resize", checkMobile)
-
-      // Clean up
-      return () => window.removeEventListener("resize", checkMobile)
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
     }
 
-    return () => {}
+    // Check on mount
+    checkIsMobile()
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkIsMobile)
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener("resize", checkIsMobile)
+    }
   }, [])
 
   return isMobile
