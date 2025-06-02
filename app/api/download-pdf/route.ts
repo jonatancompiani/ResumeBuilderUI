@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     console.log("Sending PDF download request to external API")
 
     // Forward the request to the external API
-    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/Doc/Download"
+    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/document/download"
 
     const response = await fetch(externalApiUrl, {
       method: "POST",

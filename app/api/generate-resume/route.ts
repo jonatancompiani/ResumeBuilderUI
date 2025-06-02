@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     console.log("Sending request to external API")
 
     // Forward the request to the external API
-    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/Doc/Preview"
+    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/document/preview"
 
     const response = await fetch(externalApiUrl, {
       method: "POST",

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Loader2, Plus, Trash2, Download, AlertCircle, RefreshCw } from 'lucide-react'
+import { Loader2, Plus, Trash2, Download, AlertCircle } from "lucide-react"
 import { useTheme } from "next-themes"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -15,7 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { LinkedInImportButton } from "@/components/linkedin-import-button"
 import { ExperienceCard } from "@/components/experience-card"
@@ -31,7 +30,10 @@ import { ColorSelector } from "@/components/color-selector"
 const formSchema = z.object({
   personalInfo: z.object({
     fullName: z.string().min(1, { message: "Name is required." }),
-    email: z.string().min(1, { message: "Email is required." }).email({ message: "Please enter a valid email address." }),
+    email: z
+      .string()
+      .min(1, { message: "Email is required." })
+      .email({ message: "Please enter a valid email address." }),
     phone: z.string().min(1, { message: "Phone number is required." }),
     location: z.string().min(1, { message: "Location is required." }),
     linkedin: z.string().optional(),
@@ -439,7 +441,7 @@ export default function ResumeBuilder() {
 
     if (cleanedData.education.length === 0) {
       toast({
-        title: "Education Required", 
+        title: "Education Required",
         description: "Please add at least one complete education entry.",
         variant: "destructive",
       })
@@ -669,14 +671,14 @@ export default function ResumeBuilder() {
           <form
             onSubmit={form.handleSubmit(onSubmit, (errors) => {
               console.error("Form validation errors:", errors)
-              
+
               // Show a user-friendly error message
               toast({
                 title: "Form Incomplete",
                 description: "Please fill in all required fields before generating your resume.",
                 variant: "destructive",
               })
-              
+
               navigateToFirstErrorTab()
             })}
           >
@@ -1021,64 +1023,183 @@ export default function ResumeBuilder() {
             <TabsContent value="skills">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="mb-6">
-                    <div className="flex flex-col gap-2">
-                      <div className="font-medium">Skills</div>
-                      <div className="flex">
-                        <Input
-                          placeholder="Add a skill"
-                          value={newSkill}
-                          onChange={(e) => setNewSkill(e.target.value)}
-                          className="mr-2"
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault()
-                              addSkill()
-                            }
-                          }}
-                        />
-                        <Button type="button" onClick={addSkill}>
-                          Add
-                        </Button>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <div className="mb-8">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 dark:from-blue-400/10 dark:to-purple-400/10">
+                          <svg
+                            className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold">Skills & Expertise</h3>
+                          <p className="text-sm text-muted-foreground">Add your technical and professional skills</p>
+                        </div>
                       </div>
-                    </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {form.watch("skills").map((skill, index) => (
-                      <div
-                        key={index}
-                        className="bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1 flex items-center text-sm"
+                      <motion.div
+                        className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/50 dark:to-gray-700/50 rounded-xl p-6 border border-gray-200/50 dark:border-gray-700/50"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
                       >
-                        {skill}
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="h-5 w-5 p-0 ml-1"
-                          onClick={() => removeSkill(index)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                          <span className="sr-only">Remove</span>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {form.watch("skills").length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>No skills added yet. Add your first skill above.</p>
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <div className="relative flex-1">
+                            <Input
+                              placeholder="Enter a skill (e.g., JavaScript, Project Management)"
+                              value={newSkill}
+                              onChange={(e) => setNewSkill(e.target.value)}
+                              className="pr-12 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault()
+                                  addSkill()
+                                }
+                              }}
+                            />
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                              <kbd className="px-2 py-1 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 rounded dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600">
+                                Enter
+                              </kbd>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={addSkill}
+                            disabled={!newSkill.trim()}
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Skill
+                          </Button>
+                        </div>
+                      </motion.div>
                     </div>
-                  )}
 
-                  <div className="flex justify-between mt-6">
-                    <Button type="button" variant="outline" onClick={() => setActiveTab("education")}>
-                      Previous: Education
-                    </Button>
-                    <Button type="button" onClick={() => setActiveTab("languages")}>
-                      Next: Languages
-                    </Button>
-                  </div>
+                    {/* Skills Display */}
+                    <div className="space-y-4">
+                      {form.watch("skills").length > 0 ? (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100">
+                              Your Skills ({form.watch("skills").length})
+                            </h4>
+                            {form.watch("skills").length > 0 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => form.setValue("skills", [])}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                              >
+                                Clear All
+                              </Button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <AnimatePresence>
+                              {form.watch("skills").map((skill, index) => (
+                                <motion.div
+                                  key={`${skill}-${index}`}
+                                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                                  transition={{
+                                    duration: 0.2,
+                                    delay: index * 0.05,
+                                    type: "spring",
+                                    stiffness: 300,
+                                    damping: 25,
+                                  }}
+                                  whileHover={{ scale: 1.02 }}
+                                  className="group relative"
+                                >
+                                  <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-3 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate pr-2">
+                                        {skill}
+                                      </span>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                                        onClick={() => removeSkill(index)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                        <span className="sr-only">Remove {skill}</span>
+                                      </Button>
+                                    </div>
+                                    <div className="mt-1 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity duration-200" />
+                                  </div>
+                                </motion.div>
+                              ))}
+                            </AnimatePresence>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-center py-12"
+                        >
+                          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-full flex items-center justify-center mb-4">
+                            <svg
+                              className="w-8 h-8 text-blue-600 dark:text-blue-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                              />
+                            </svg>
+                          </div>
+                          <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                            No skills added yet
+                          </h4>
+                          <p className="text-muted-foreground mb-4">
+                            Start building your skill set by adding your first skill above
+                          </p>
+                          <div className="flex flex-wrap gap-2 justify-center text-xs text-muted-foreground">
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">JavaScript</span>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">React</span>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">Project Management</span>
+                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded">Communication</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">Examples of skills you can add</p>
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between mt-8">
+                      <Button type="button" variant="outline" onClick={() => setActiveTab("education")}>
+                        Previous: Education
+                      </Button>
+                      <Button type="button" onClick={() => setActiveTab("languages")}>
+                        Next: Languages
+                      </Button>
+                    </div>
+                  </motion.div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -1255,10 +1376,10 @@ export default function ResumeBuilder() {
                           {isSubmitting ? (
                             <>
                               <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                              Regenerating...
+                              Generating Preview...
                             </>
                           ) : (
-                            "Regenerate Resume"
+                            "Preview Resume"
                           )}
                         </Button>
                       </div>
@@ -1278,10 +1399,10 @@ export default function ResumeBuilder() {
                           {isSubmitting ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Generating Resume...
+                              Generating Preview...
                             </>
                           ) : (
-                            "Generate Resume"
+                            "Preview Resume"
                           )}
                         </Button>
                       </div>

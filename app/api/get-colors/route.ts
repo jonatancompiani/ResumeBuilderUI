@@ -5,7 +5,7 @@ export async function GET() {
     console.log("Fetching available colors")
 
     // Forward the request to the external API
-    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/Doc/Colors"
+    const externalApiUrl = "https://freeresumebuilder.azurewebsites.net/Color/Colors"
 
     const response = await fetch(externalApiUrl, {
       method: "GET",
