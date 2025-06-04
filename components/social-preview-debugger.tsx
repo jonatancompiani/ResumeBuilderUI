@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { ExternalLink, Copy, Check, RefreshCw } from "lucide-react"
+import { toast } from "@/components/ui/use-toast"
 
 export function SocialPreviewDebugger() {
   const [currentUrl, setCurrentUrl] = useState("")
@@ -32,20 +33,34 @@ export function SocialPreviewDebugger() {
     setIsLoading(true)
     setError(null)
     try {
-      // This is a mock function since we can't actually fetch OG data client-side due to CORS
-      // In a real implementation, you would use a server endpoint to fetch this data
-      await new Promise((resolve) => setTimeout(resolve, 1000)) // Simulate network request
+      // Since we can't fetch OG data client-side due to CORS, we'll create a server endpoint
+      const response = await fetch("/api/og-data", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ url: currentUrl }),
+      })
 
-      // Mock data
-      setOgData({
+      if (!response.ok) {
+        throw new Error(`Failed to fetch Open Graph data: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setOgData(data)
+    } catch (err) {
+      console.error("Error fetching OG data:", err)
+      setError("Failed to fetch Open Graph data. Try using an external validator.")
+
+      // Fallback: create mock data based on current URL
+      const mockData = {
         title: "vitae.uno | Free Resume Builder",
         description: "Create professional resumes and CVs easily with vitae.uno",
-        ogImage: `${window.location.origin}/opengraph-image.png`,
-        twitterImage: `${window.location.origin}/twitter-image.png`,
+        ogImage: `${window.location.origin}/opengraph-image`,
+        twitterImage: `${window.location.origin}/twitter-image`,
         url: currentUrl,
-      })
-    } catch (err) {
-      setError("Failed to fetch Open Graph data. Try using an external validator.")
+      }
+      setOgData(mockData)
     } finally {
       setIsLoading(false)
     }
@@ -100,6 +115,41 @@ export function SocialPreviewDebugger() {
             </Button>
           </div>
 
+          <div className="mt-4">
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await fetch("/api/test-og")
+                  const data = await response.json()
+                  console.log("OG Image Test Results:", data)
+
+                  if (data.ogImage?.ok && data.twitterImage?.ok) {
+                    toast({
+                      title: "Images Working",
+                      description: "Open Graph and Twitter images are loading correctly.",
+                    })
+                  } else {
+                    toast({
+                      title: "Image Issues Detected",
+                      description: "Some images may not be loading properly. Check console for details.",
+                      variant: "destructive",
+                    })
+                  }
+                } catch (error) {
+                  console.error("Error testing images:", error)
+                  toast({
+                    title: "Test Failed",
+                    description: "Could not test image endpoints.",
+                    variant: "destructive",
+                  })
+                }
+              }}
+              variant="outline"
+            >
+              Test Image Endpoints
+            </Button>
+          </div>
+
           {error && (
             <Alert variant="destructive">
               <AlertTitle>Error</AlertTitle>
@@ -121,8 +171,8 @@ export function SocialPreviewDebugger() {
                         alt="Open Graph preview"
                         className="w-full h-auto"
                         onError={(e) => {
+                          console.error("Failed to load OG image:", ogData.ogImage)
                           e.currentTarget.src = "/placeholder.svg?height=630&width=1200"
-                          setError("Failed to load Open Graph image. Check the URL and server configuration.")
                         }}
                       />
                     </div>
@@ -141,8 +191,8 @@ export function SocialPreviewDebugger() {
                         alt="Twitter Card preview"
                         className="w-full h-auto"
                         onError={(e) => {
+                          console.error("Failed to load Twitter image:", ogData.twitterImage)
                           e.currentTarget.src = "/placeholder.svg?height=630&width=1200"
-                          setError("Failed to load Twitter Card image. Check the URL and server configuration.")
                         }}
                       />
                     </div>

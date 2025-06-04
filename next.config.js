@@ -17,7 +17,7 @@ export default {
       },
     ],
   },
-  // Ensure proper handling of Open Graph images
+  // Ensure proper handling of Open Graph images and CORS
   async headers() {
     return [
       {
@@ -27,6 +27,18 @@ export default {
           {
             key: "Cache-Control",
             value: "public, max-age=3600, stale-while-revalidate=86400",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET, POST, PUT, DELETE, OPTIONS",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
           },
         ],
       },
@@ -42,6 +54,10 @@ export default {
             key: "Content-Type",
             value: "image/png",
           },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
         ],
       },
       {
@@ -55,6 +71,24 @@ export default {
           {
             key: "Content-Type",
             value: "image/png",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
+          },
+        ],
+      },
+      {
+        // Apply to favicon and other static assets
+        source: "/favicon.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "*",
           },
         ],
       },
