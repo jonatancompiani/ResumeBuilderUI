@@ -2,7 +2,6 @@ import { NextResponse } from "next/server"
 
 console.log("test")
 
-
 // LinkedIn OpenID Connect credentials from environment variables
 const LINKEDIN_CLIENT_ID = process.env.LINKEDIN_CLIENT_ID || ""
 const LINKEDIN_CLIENT_SECRET = process.env.LINKEDIN_CLIENT_SECRET || ""
@@ -12,22 +11,22 @@ const REDIRECT_URI = process.env.NEXT_PUBLIC_URL
 
 export async function GET(request: Request) {
   try {
-    console.log("0")
-
+    console.log("LinkedIn API route called")
 
     const { searchParams } = new URL(request.url)
     const code = searchParams.get("code")
 
-    console.log("1")
+    console.log("Code parameter:", code ? "present" : "not present")
 
     if (!code) {
       // If no code is provided, return the LinkedIn authorization URL using OpenID Connect
       const state = generateRandomState()
-      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email&state=${state}`
+      const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=openid%20profile%20email&state=${state}`
+      console.log("Generated auth URL:", authUrl)
       return NextResponse.json({ authUrl, state })
     }
 
-    console.log("2")
+    console.log("Exchanging code for tokens...")
 
     // Exchange code for tokens (access token and id token)
     const tokenResponse = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
@@ -45,16 +44,22 @@ export async function GET(request: Request) {
     })
 
     if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      console.error("Token exchange failed:", tokenResponse.status, errorText)
       throw new Error(`Failed to get access token: ${tokenResponse.status}`)
     }
-    console.log("3")
+
+    console.log("Token exchange successful")
 
     const tokenData = await tokenResponse.json()
     const accessToken = tokenData.access_token
-    const idToken = tokenData.id_token // OpenID Connect provides an ID token
+    const idToken = tokenData.id_token
+
+    console.log("Tokens received, decoding ID token...")
 
     // Decode the ID token to get basic profile information
     const profileData = decodeIdToken(idToken)
+    console.log("ID token decoded:", Object.keys(profileData))
 
     // Use the access token to get additional profile data
     const profileResponse = await fetch("https://api.linkedin.com/v2/userinfo", {
@@ -63,30 +68,29 @@ export async function GET(request: Request) {
       },
     })
 
-    console.log("4")
-
     if (!profileResponse.ok) {
+      const errorText = await profileResponse.text()
+      console.error("Profile fetch failed:", profileResponse.status, errorText)
       throw new Error(`Failed to get profile data: ${profileResponse.status}`)
     }
 
-    console.log("5")
+    console.log("Profile data fetched successfully")
 
     const additionalProfileData = await profileResponse.json()
+    console.log("Additional profile data:", Object.keys(additionalProfileData))
 
     // Extract LinkedIn profile URL or ID
     let linkedinUrl = ""
 
     // Try to get LinkedIn ID from the sub field
     if (additionalProfileData.sub) {
-      // The sub field typically contains the format "linkedin:member:<id>"
       const linkedinId = extractLinkedInId(additionalProfileData.sub)
       if (linkedinId) {
         linkedinUrl = `https://www.linkedin.com/in/${linkedinId}`
       }
     }
 
-    console.log("websites")
-    console.log(additionalProfileData.website)
+    console.log("LinkedIn URL extracted:", linkedinUrl)
 
     // If we couldn't extract from sub, check if there's a direct URL in the response
     if (!linkedinUrl && additionalProfileData.website) {
@@ -94,7 +98,6 @@ export async function GET(request: Request) {
         ? additionalProfileData.website
         : [additionalProfileData.website]
 
-      // Find the first LinkedIn URL in the websites array
       const linkedinWebsite = websites.find((site) => typeof site === "string" && site.includes("linkedin.com/in/"))
 
       if (linkedinWebsite) {
@@ -113,29 +116,29 @@ export async function GET(request: Request) {
       email: additionalProfileData.email || profileData.email || "",
       profilePicture: additionalProfileData.picture || null,
       // Mock data for positions/experience, education, and skills
-      // LinkedIn's API has limited access to this data for most developers
       positions: [
         {
-          companyName: "Potato",
+          companyName: "Example Company",
           title: "Software Engineer",
           startDate: { month: 1, year: 2020 },
           endDate: null,
-          description: "Worked on various web development projects",
+          description: "Worked on various web development projects using modern technologies",
         },
       ],
       education: [
         {
           schoolName: "Example University",
-          degree: "Bachelor's",
+          degree: "Bachelor's Degree",
           fieldOfStudy: "Computer Science",
           startDate: { month: 9, year: 2016 },
           endDate: { month: 6, year: 2020 },
         },
       ],
-      skills: ["JavaScript", "React", "Node.js"],
+      skills: ["JavaScript", "React", "Node.js", "TypeScript", "Python"],
       linkedinUrl: linkedinUrl,
     }
 
+    console.log("User data prepared successfully")
     return NextResponse.json({ success: true, userData })
   } catch (error) {
     console.error("LinkedIn API error:", error)

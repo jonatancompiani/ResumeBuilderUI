@@ -30,35 +30,48 @@ export function LinkedInImportButton({ onDataReceived, className = "" }: LinkedI
       const error = urlParams.get("linkedin_error")
 
       if (code) {
+        console.log("Found LinkedIn code in URL:", code)
         handleLinkedInCode(code)
         // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname)
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
       } else if (error) {
+        console.log("Found LinkedIn error in URL:", error)
         toast({
           title: "LinkedIn Error",
           description: `Failed to connect to LinkedIn: ${error}`,
           variant: "destructive",
         })
         // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname)
+        const newUrl = window.location.pathname
+        window.history.replaceState({}, document.title, newUrl)
       }
     }
 
     // Set up message listener for popup communication
     const messageHandler = (event: MessageEvent) => {
+      console.log("Received message:", event.data, "from origin:", event.origin)
+
       // Verify origin for security
-      if (event.origin !== window.location.origin) return
+      if (event.origin !== window.location.origin) {
+        console.log("Message from different origin, ignoring")
+        return
+      }
 
       if (event.data && event.data.type === "LINKEDIN_AUTH_CALLBACK") {
+        console.log("Processing LinkedIn callback message")
         if (event.data.code) {
+          console.log("Code received via message:", event.data.code)
           handleLinkedInCode(event.data.code)
         } else if (event.data.error) {
+          console.log("Error received via message:", event.data.error)
           toast({
             title: "LinkedIn Error",
             description: `Failed to connect to LinkedIn: ${event.data.error}`,
             variant: "destructive",
           })
         }
+        setIsLoading(false)
       }
     }
 
@@ -79,13 +92,17 @@ export function LinkedInImportButton({ onDataReceived, className = "" }: LinkedI
       const data = await response.json()
 
       if (data.authUrl) {
+        console.log("LinkedIn auth URL received:", data.authUrl)
+
         // For mobile, redirect directly instead of using a popup
         if (isMobile) {
+          console.log("Mobile detected, redirecting directly")
           window.location.href = data.authUrl
           return
         }
 
         // Open LinkedIn authorization in a popup for desktop
+        console.log("Desktop detected, opening popup")
         const width = 600
         const height = 700
         const left = window.innerWidth / 2 - width / 2
@@ -94,17 +111,22 @@ export function LinkedInImportButton({ onDataReceived, className = "" }: LinkedI
         popupRef.current = window.open(
           data.authUrl,
           "linkedin-auth",
-          `width=${width},height=${height},top=${top},left=${left}`,
+          `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`,
         )
 
         // Check if popup was blocked
         if (!popupRef.current || popupRef.current.closed || typeof popupRef.current.closed === "undefined") {
-          throw new Error("Popup blocked. Please allow popups for this site.")
+          console.log("Popup blocked, falling back to redirect")
+          window.location.href = data.authUrl
+          return
         }
+
+        console.log("Popup opened successfully")
 
         // Poll to check if popup is closed
         popupCheckIntervalRef.current = setInterval(() => {
           if (popupRef.current && popupRef.current.closed) {
+            console.log("Popup closed by user")
             clearInterval(popupCheckIntervalRef.current!)
             setIsLoading(false)
           }
@@ -124,10 +146,13 @@ export function LinkedInImportButton({ onDataReceived, className = "" }: LinkedI
   }
 
   const handleLinkedInCode = async (code: string) => {
+    console.log("Processing LinkedIn code:", code)
     setIsLoading(true)
     try {
       const response = await fetch(`/api/linkedin?code=${code}`)
       const data = await response.json()
+
+      console.log("LinkedIn API response:", data)
 
       if (data.success && data.userData) {
         // Validate LinkedIn URL before passing it to the form
@@ -143,6 +168,7 @@ export function LinkedInImportButton({ onDataReceived, className = "" }: LinkedI
           }
         }
 
+        console.log("LinkedIn data processed successfully:", data.userData)
         toast({
           title: "LinkedIn Connected",
           description: "Your LinkedIn data has been imported successfully.",
