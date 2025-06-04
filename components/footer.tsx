@@ -29,6 +29,9 @@ export function Footer() {
               <Link href="/" className="hover:underline">
                 Home
               </Link>
+              <Link href="/builder" className="hover:underline">
+                Resume Builder
+              </Link>
               <Link href="/privacy-policy" className="hover:underline">
                 Privacy Policy
               </Link>
@@ -37,15 +40,6 @@ export function Footer() {
               </Link>
               <Link href="/brand" className="hover:underline">
                 Brand Assets
-              </Link>
-              <Link href="/donation-stats" className="hover:underline">
-                Donation Stats
-              </Link>
-              <Link href="/social-preview" className="hover:underline">
-                Social Preview
-              </Link>
-              <Link href="/debug-social" className="hover:underline">
-                Debug Social Preview
               </Link>
             </div>
           </div>
